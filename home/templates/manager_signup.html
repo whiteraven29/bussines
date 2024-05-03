@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Manager Sign Up</h2>
+    <form action="{% url 'manager_signup' %}" method="post">
+        {% csrf_token %}
+        <label for="id_firstname">First Name:</label>
+        {{ manager_signup_form.firstname }}
+        {% if manager_signup_form.firstname.errors %}
+        <span class="error">{{ manager_signup_form.firstname.errors }}</span>
+        {% endif %}
+        <label for="id_lastname">Last Name:</label>
+        {{ manager_signup_form.lastname }}
+        {% if manager_signup_form.lastname.errors %}
+        <span class="error">{{ manager_signup_form.lastname.errors }}</span>
+        {% endif %}
+        <label for="id_username">Username:</label>
+        {{ manager_signup_form.username }}
+        {% if manager_signup_form.username.errors %}
+        <span class="error">{{ manager_signup_form.username.errors }}</span>
+        {% endif %}
+        <label for="id_email">Email:</label>
+        {{ manager_signup_form.email }}
+        {% if manager_signup_form.email.errors %}
+        <span class="error">{{ manager_signup_form.email.errors }}</span>
+        {% endif %}
+        <label for="id_password">Password:</label>
+        {{ manager_signup_form.password }}
+        {% if manager_signup_form.password.errors %}
+        <span class="error">{{ manager_signup_form.password.errors }}</span>
+        {% endif %}
+        <button type="submit">Sign Up</button>
+    </form>
+</body>
+</html>
