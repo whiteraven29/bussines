@@ -9,7 +9,6 @@ class Branch(models.Model):
 class Worker(models.Model):
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     username = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
     email = models.EmailField()

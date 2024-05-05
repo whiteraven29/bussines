@@ -9,7 +9,7 @@ class BranchForm(forms.ModelForm):
 class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
-        fields = ['firstname', 'lastname', 'branch', 'username', 'password', 'email']
+        fields = ['firstname', 'lastname', 'username', 'password', 'email']
 
 class DailyReportForm(forms.ModelForm):
     class Meta:

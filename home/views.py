@@ -14,10 +14,6 @@ def services(request):
     return render(request, 'services.html')
 
 
-def home(request):
-    manager_signup_form = ManagerSignupForm()
-    private_signup_form = PrivateSignupForm()
-    return render(request, 'home.html', {'manager_signup_form': manager_signup_form, 'private_signup_form': private_signup_form})
 
 def manager_signup(request):
     if request.method == 'POST':
@@ -33,17 +29,17 @@ def manager_signup(request):
             # Check if email is a Gmail address
             if not email.endswith('@gmail.com'):
                 form.add_error('email', 'Please use a valid Gmail address')
-                return render(request, 'home.html', {'manager_signup_form': form, 'private_signup_form': PrivateSignupForm()})
+                return render(request, 'manager_signup.html', {'manager_signup_form': form})
 
             # Check password requirements
             if len(password) < 8 or not any(char.isdigit() for char in password) or not any(char.isalpha() for char in password):
                 form.add_error('password', 'Password must be at least 8 characters long and contain both letters and numbers')
-                return render(request, 'home.html', {'manager_signup_form': form, 'private_signup_form': PrivateSignupForm()})
+                return render(request, 'manager_signup.html', {'manager_signup_form': form})
 
             # Check if username or email already exists for manager
             if ManagerWorker.objects.filter(username=username).exists() or ManagerWorker.objects.filter(email=email).exists():
                 form.add_error('username', 'Username or email already exists')
-                return render(request, 'home.html', {'manager_signup_form': form, 'private_signup_form': PrivateSignupForm()})
+                return render(request, 'manager_signup.html', {'manager_signup_form': form})
 
             # Create manager user
             manager_user = ManagerWorker.objects.create(
@@ -54,9 +50,13 @@ def manager_signup(request):
                 password=password
             )
 
-            return redirect('manager_signup')
+            return redirect('home')  # Redirect to login page after successful signup
 
-    return redirect('manager_signup')
+    else:
+        form = ManagerSignupForm()
+
+    return render(request, 'manager_signup.html', {'manager_signup_form': form})
+
 
 def private_signup(request):
     if request.method == 'POST':
@@ -72,17 +72,17 @@ def private_signup(request):
             # Check if email is a Gmail address
             if not email.endswith('@gmail.com'):
                 form.add_error('email', 'Please use a valid Gmail address')
-                return render(request, 'home.html', {'manager_signup_form': ManagerSignupForm(), 'private_signup_form': form})
+                return render(request, 'private_signup.html', {'private_signup_form': form})
 
             # Check password requirements
             if len(password) < 8 or not any(char.isdigit() for char in password) or not any(char.isalpha() for char in password):
                 form.add_error('password', 'Password must be at least 8 characters long and contain both letters and numbers')
-                return render(request, 'home.html', {'manager_signup_form': ManagerSignupForm(), 'private_signup_form': form})
+                return render(request, 'private_signup.html', {'private_signup_form': form})
 
             # Check if username or email already exists for private user
             if PrivateWorker.objects.filter(username=username).exists() or PrivateWorker.objects.filter(email=email).exists():
                 form.add_error('username', 'Username or email already exists')
-                return render(request, 'home.html', {'manager_signup_form': ManagerSignupForm(), 'private_signup_form': form})
+                return render(request, 'private_signup.html', {'private_signup_form': form})
 
             # Create private user
             private_user = PrivateWorker.objects.create(
@@ -93,9 +93,12 @@ def private_signup(request):
                 password=password
             )
 
-            return redirect('private_signup')
+            return redirect('home')  # Redirect to login page after successful signup
 
-    return redirect('private_signup')
+    else:
+        form = PrivateSignupForm()
+
+    return render(request, 'private_signup.html', {'private_signup_form': form})
 
 def login(request):
     if request.method == 'POST':
@@ -131,5 +134,5 @@ def login(request):
                 except PrivateWorker.DoesNotExist:
                     pass  # Private user credentials not found
 
-    return redirect('login')  # Redirect to home page if login fails
+    return render(request, 'login.html')  # Redirect to home page if login fails
 

@@ -3,38 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Private User Sign Up</title>
 </head>
 <body>
-    <!-- Private User Signup Form -->
     <h2>Private User Sign Up</h2>
     <form action="{% url 'private_signup' %}" method="post">
         {% csrf_token %}
         <label for="id_firstname">First Name:</label>
         {{ private_signup_form.firstname }}
         {% if private_signup_form.firstname.errors %}
-        <span class="error">{{ private_signup_form.firstname.errors }}</span>
+            <span class="error">{{ private_signup_form.firstname.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_lastname">Last Name:</label>
         {{ private_signup_form.lastname }}
         {% if private_signup_form.lastname.errors %}
-        <span class="error">{{ private_signup_form.lastname.errors }}</span>
+            <span class="error">{{ private_signup_form.lastname.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_username">Username:</label>
         {{ private_signup_form.username }}
         {% if private_signup_form.username.errors %}
-        <span class="error">{{ private_signup_form.username.errors }}</span>
+            <span class="error">{{ private_signup_form.username.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_email">Email:</label>
         {{ private_signup_form.email }}
         {% if private_signup_form.email.errors %}
-        <span class="error">{{ private_signup_form.email.errors }}</span>
+            <span class="error">{{ private_signup_form.email.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_password">Password:</label>
         {{ private_signup_form.password }}
         {% if private_signup_form.password.errors %}
-        <span class="error">{{ private_signup_form.password.errors }}</span>
+            <span class="error">{{ private_signup_form.password.errors }}</span>
         {% endif %}
+        <br>
         <button type="submit">Sign Up</button>
     </form>
 </body>

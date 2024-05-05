@@ -1,11 +1,11 @@
 from django import forms
 
 class ManagerSignupForm(forms.Form):
-    firstname = forms.CharField(max_length=100, label="First Name")
-    lastname = forms.CharField(max_length=100, label="Last Name")
-    username = forms.CharField(max_length=100, label="Username")
+    firstname = forms.CharField(max_length=100)
+    lastname = forms.CharField(max_length=100)
+    username = forms.CharField(max_length=100)
     email = forms.EmailField(label="Email")
-    password = forms.CharField(max_length=100, widget=forms.PasswordInput, label="Password")
+    password = forms.CharField(max_length=100, widget=forms.PasswordInput)
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -20,11 +20,11 @@ class ManagerSignupForm(forms.Form):
         return password
 
 class PrivateSignupForm(forms.Form):
-    firstname = forms.CharField(max_length=100, label="First Name")
-    lastname = forms.CharField(max_length=100, label="Last Name")
-    username = forms.CharField(max_length=100, label="Username")
+    firstname = forms.CharField(max_length=100)
+    lastname = forms.CharField(max_length=100)
+    username = forms.CharField(max_length=100)
     email = forms.EmailField(label="Email")
-    password = forms.CharField(max_length=100, widget=forms.PasswordInput, label="Password")
+    password = forms.CharField(max_length=100, widget=forms.PasswordInput)
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
