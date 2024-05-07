@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import ManagerSignupForm, PrivateSignupForm, LoginForm
-from manager.models import Worker as ManagerWorker
-from private.models import Worker as PrivateWorker
+from manager.models import Manager as ManagerWorker
+from private.models import Single as PrivateWorker
 from worker.models import Worker as WorkerWorker
 
 def home(request):
@@ -100,6 +100,10 @@ def private_signup(request):
 
     return render(request, 'private_signup.html', {'private_signup_form': form})
 
+from django.shortcuts import render, redirect
+from .forms import LoginForm
+from worker.models import Worker
+
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -120,10 +124,11 @@ def login(request):
             elif login_type == 'worker':
                 # Check worker credentials
                 try:
-                    worker_worker = WorkerWorker.objects.get(branch=login_username, password=login_password)
+                    # Query Worker by username (assuming username is branch name) and password
+                    worker_worker = Worker.objects.get(branch__name=login_username, password=login_password)
                     # Redirect to worker dashboard
                     return redirect('worker_dashboard')
-                except WorkerWorker.DoesNotExist:
+                except Worker.DoesNotExist:
                     pass  # Worker credentials not found
             elif login_type == 'private':
                 # Check private user credentials
@@ -134,5 +139,9 @@ def login(request):
                 except PrivateWorker.DoesNotExist:
                     pass  # Private user credentials not found
 
-    return render(request, 'login.html')  # Redirect to home page if login fails
+    else:
+        # If it's not a POST request, create an empty form
+        form = LoginForm()
 
+    # Render the login page with the form
+    return render(request, 'login.html', {'form': form})

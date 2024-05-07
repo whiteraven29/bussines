@@ -1,6 +1,6 @@
 from django.db import models
 
-class Worker(models.Model):
+class Single(models.Model):
     # Define your fields here
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)

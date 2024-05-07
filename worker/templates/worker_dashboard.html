@@ -14,6 +14,7 @@
         {% endfor %}
     </ul>
     <h2>Items</h2>
+    <a href="{% url 'register_item' %}">Register Item</a>
     <ul>
         {% for item in items %}
             <li>{{ item.name }}</li>
@@ -21,6 +22,6 @@
             <a href="{% url 'delete_item' item.id %}">Delete</a>
         {% endfor %}
     </ul>
-    <a href="{% url 'register_item' %}">Register Item</a>
+    <a href="{% url 'fill_report' %}"><button>Fill Report</button></a>
 </body>
 </html>

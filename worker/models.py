@@ -1,6 +1,31 @@
 from django.db import models
-from manager.models import Worker
+from django.contrib.auth.models import AbstractUser
+from manager.models import Branch
 
+class Worker(AbstractUser):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='workers')
+    # Add other fields if necessary
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='worker_groups',
+        blank=True,
+        verbose_name='groups',
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='worker_user_permissions',
+        blank=True,
+        verbose_name='user permissions',
+        help_text='Specific permissions for this user.',
+    )
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.branch.name})"
+class Meta:
+        verbose_name = 'Worker'
+        verbose_name_plural = 'Workers'    
+  
 class Item(models.Model):
     name = models.CharField(max_length=100)
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
