@@ -14,21 +14,25 @@
         {% if manager_signup_form.firstname.errors %}
         <span class="error">{{ manager_signup_form.firstname.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_lastname">Last Name:</label>
         {{ manager_signup_form.lastname }}
         {% if manager_signup_form.lastname.errors %}
         <span class="error">{{ manager_signup_form.lastname.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_username">Username:</label>
         {{ manager_signup_form.username }}
         {% if manager_signup_form.username.errors %}
         <span class="error">{{ manager_signup_form.username.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_email">Email:</label>
         {{ manager_signup_form.email }}
         {% if manager_signup_form.email.errors %}
         <span class="error">{{ manager_signup_form.email.errors }}</span>
         {% endif %}
+        <br>
         <label for="id_password">Password:</label>
         {{ manager_signup_form.password }}
         {% if manager_signup_form.password.errors %}

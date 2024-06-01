@@ -1,3 +1,4 @@
+{% load static%}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 
 <body>
@@ -13,16 +15,31 @@
             <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
             <li><a href="{% url 'services' %}">Services</a></li>
-            <!-- Add language switch here -->
         </ul>
     </nav>
+
     <h1>Welcome to Business Management System</h1>
-    <!-- Add more content here -->
-    <p><span>as manager click here</span></p>
-    <a href="{% url 'manager_signup'%}">signup</a>
-    <p><span>as private bussiness click here</span></p>
-    <a href="{% url 'private_signup'%}">signup</a>
-    <p><span>LOGIN</span></p>
-    <a href="{% url 'login'%}">login</a>
+
+    <div class="content">
+        <p><span>As manager click here</span></p>
+        <a href="{% url 'manager_signup' %}" class="button">Sign Up</a>
+        
+        <p><span>As private business click here</span></p>
+        <a href="{% url 'private_signup' %}" class="button">Sign Up</a>
+        
+        <p><span>LOGIN</span></p>
+        <a href="{% url 'login_view' %}" class="button">Login</a>
+    </div>
+
+    <footer>
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank">Facebook</a>
+            <a href="https://twitter.com" target="_blank">Twitter</a>
+            <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+            <a href="https://instagram.com" target="_blank">Instagram</a>
+        </div>
+        <p>&copy; 2024 Business Management System. All rights reserved.</p>
+    </footer>
 </body>
+
 </html>

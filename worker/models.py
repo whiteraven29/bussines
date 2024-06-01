@@ -4,6 +4,8 @@ from manager.models import Branch
 
 class Worker(AbstractUser):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='workers')
+    first_name=models.CharField(max_length=100)
+    last_name=models.CharField(max_length=100)
     # Add other fields if necessary
     groups = models.ManyToManyField(
         'auth.Group',
@@ -22,7 +24,7 @@ class Worker(AbstractUser):
     
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.branch.name})"
-class Meta:
+    class Meta:
         verbose_name = 'Worker'
         verbose_name_plural = 'Workers'    
   

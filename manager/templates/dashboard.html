@@ -11,24 +11,24 @@
     <h1>{% trans "Manager Dashboard" %}</h1>
     <ul>
         {% for branch in branches %}
-            <li>{{ branch.name }} - <a href="{% url 'branch_reports' branch.id %}">{% trans "Report" %}</a></li>
+            <li>{{ branch.name }} - <a href="{% url 'manager:branch_reports' branch.id %}">{% trans "Report" %}</a></li>
             <img src="data:image/png;base64,{{ branch.graph }}" alt="{% trans "Profit/Loss Graph" %}">
         {% endfor %}
     </ul>
     <h2>{% trans "Workers" %}</h2>
     <ul>
         {% for worker in workers %}
-            <li>{{ worker.firstname }} {{ worker.lastname }}</li>
-            <a href="{% url 'unregister_worker' worker.id %}">{% trans "Unregister" %}</a>
+            <li>{{ worker.first_name }} {{ worker.last_name }}</li>
+            <a href="{% url 'manager:unregister_worker' worker.id %}">{% trans "Unregister" %}</a>
         {% endfor %}
     </ul>
     <h2>{% trans "Reports" %}</h2>
     <ul>
         {% for report in reports %}
-            <li>{{ report.worker.firstname }} {{ report.worker.lastname }} - {{ report.date }}</li>
+            <li>{{ report.worker.first_name }} {{ report.worker.last_name }} - {{ report.date }}</li>
         {% endfor %}
     </ul>
-    <a href="{% url 'register_branch' %}">{% trans "Register Branch" %}</a>
-    <a href="{% url 'register_worker' %}">{% trans "Register Worker" %}</a>
+    <a href="{% url 'manager:register_branch' %}">{% trans "Register Branch" %}</a>
+    <a href="{% url 'manager:register_worker' %}">{% trans "Register Worker" %}</a>
 </body>
 </html>

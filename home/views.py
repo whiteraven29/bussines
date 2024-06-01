@@ -1,8 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from .forms import ManagerSignupForm, PrivateSignupForm, LoginForm
 from manager.models import Manager as ManagerWorker
 from private.models import Single as PrivateWorker
 from worker.models import Worker as WorkerWorker
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password
+
 
 def home(request):
     return render(request, 'home.html')
@@ -12,7 +16,6 @@ def about(request):
 
 def services(request):
     return render(request, 'services.html')
-
 
 
 def manager_signup(request):
@@ -41,13 +44,16 @@ def manager_signup(request):
                 form.add_error('username', 'Username or email already exists')
                 return render(request, 'manager_signup.html', {'manager_signup_form': form})
 
+            # Hash the password
+            hashed_password = make_password(password)
+
             # Create manager user
             manager_user = ManagerWorker.objects.create(
                 firstname=firstname,
                 lastname=lastname,
                 username=username,
                 email=email,
-                password=password
+                password=hashed_password  # Save hashed password
             )
 
             return redirect('home')  # Redirect to login page after successful signup
@@ -84,27 +90,28 @@ def private_signup(request):
                 form.add_error('username', 'Username or email already exists')
                 return render(request, 'private_signup.html', {'private_signup_form': form})
 
+            # Hash the password
+            hashed_password = make_password(password)
+
             # Create private user
             private_user = PrivateWorker.objects.create(
                 firstname=firstname,
                 lastname=lastname,
                 username=username,
                 email=email,
-                password=password
+                password=hashed_password  # Save hashed password
             )
 
-            return redirect('home')  # Redirect to login page after successful signup
+            return redirect('private_dashboard')  # Redirect to login page after successful signup
 
     else:
         form = PrivateSignupForm()
 
     return render(request, 'private_signup.html', {'private_signup_form': form})
 
-from django.shortcuts import render, redirect
-from .forms import LoginForm
-from worker.models import Worker
+# views.py
 
-def login(request):
+def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -112,36 +119,21 @@ def login(request):
             login_password = form.cleaned_data['login_password']
             login_type = form.cleaned_data['login_type']
 
-            # Implement your login logic here
-            if login_type == 'manager':
-                # Check manager credentials
-                try:
-                    manager_worker = ManagerWorker.objects.get(username=login_username, password=login_password)
-                    # Redirect to manager dashboard
-                    return redirect('dashboard')
-                except ManagerWorker.DoesNotExist:
-                    pass  # Manager credentials not found
-            elif login_type == 'worker':
-                # Check worker credentials
-                try:
-                    # Query Worker by username (assuming username is branch name) and password
-                    worker_worker = Worker.objects.get(branch__name=login_username, password=login_password)
-                    # Redirect to worker dashboard
-                    return redirect('worker_dashboard')
-                except Worker.DoesNotExist:
-                    pass  # Worker credentials not found
-            elif login_type == 'private':
-                # Check private user credentials
-                try:
-                    private_worker = PrivateWorker.objects.get(username=login_username, password=login_password)
-                    # Redirect to private dashboard
-                    return redirect('private_dashboard')
-                except PrivateWorker.DoesNotExist:
-                    pass  # Private user credentials not found
+            user = authenticate(request, username=login_username, password=login_password)
 
+            if user is not None:
+                if user.is_active:
+                    auth_login(request, user)
+                    if login_type == 'manager':
+                        return redirect('/manager/dashboard/')
+                    elif login_type == 'worker':
+                        return redirect('/worker/worker_dashboard/')
+                    elif login_type == 'private':
+                        return redirect('/private/private_dashboard/')
+                else:
+                    return HttpResponse("User is inactive")
+            else:
+                return HttpResponse("Invalid login")
     else:
-        # If it's not a POST request, create an empty form
         form = LoginForm()
-
-    # Render the login page with the form
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})

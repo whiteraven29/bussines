@@ -1,7 +1,12 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.conf import settings
+from django.core.exceptions import ValidationError
 
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+from django.conf import settings
+from django.core.exceptions import ValidationError
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
@@ -27,16 +32,16 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, username, password, **extra_fields)
 
-class Manager(AbstractBaseUser):
+class Manager(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=30, unique=True)
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
     objects = CustomUserManager()
 
@@ -51,9 +56,14 @@ class Manager(AbstractBaseUser):
         self.clean()
         super().save(*args, **kwargs)
 
+
 class Branch(models.Model):
     name = models.CharField(max_length=100)
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='branches')
 
     def __str__(self):
         return self.name
 
+class Worker(models.Model):
+    name = models.CharField(max_length=255)
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)

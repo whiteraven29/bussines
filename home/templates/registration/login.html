@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
 </head>
 <body>
+    <h1>Custom Login</h1>
     <h2>Login</h2>
-    <form action="{% url 'login' %}" method="post">
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form action="{% url 'login_view' %}" method="post">
         {% csrf_token %}
         <label for="login_username">Username:</label>
         <input type="text" id="login_username" name="login_username" required><br>
@@ -23,5 +31,6 @@
         </select><br>
 
         <button type="submit">Log In</button>
+    </form>
 </body>
 </html>

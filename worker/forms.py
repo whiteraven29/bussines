@@ -4,8 +4,10 @@ from .models import Worker,ItemReport,Item
 class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
-        fields = ['branch', 'username', 'password']
-
+        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'branch']
+        widgets = {
+            'password': forms.PasswordInput(),
+        }
 class ItemRegistrationForm(forms.ModelForm):
     class Meta:
         model = Item

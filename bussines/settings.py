@@ -104,6 +104,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -125,3 +127,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTHENTICATION_BACKENDS = [
+    'custom_auth.CustomUserAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',   
+]
+
+
+AUTH_USER_MODEL = 'manager.Manager'

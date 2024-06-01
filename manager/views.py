@@ -1,66 +1,65 @@
+
 from django.shortcuts import render, redirect
 from django.db.models import Sum
 from .models import Branch, Manager
+from worker.models import Worker, ItemReport, Item
+from .forms import BranchForm, ManagerSignupForm
+from worker.forms import WorkerForm
+from django.contrib.auth.decorators import login_required
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
-from .forms import BranchForm,ManagerSignupForm
-from worker.models import Worker, ItemReport, Item
-from worker.forms import WorkerForm
 
-
-
-def manager_signup(request):
-    if request.method == 'POST':
-        form = ManagerSignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')  # Redirect to manager dashboard after signup
-    else:
-        form = ManagerSignupForm()
-    return render(request, 'manager_signup.html', {'form': form})
-
-def register_branch(request):
-    if request.method == 'POST':
-        form = BranchForm(request.POST)
-        if form.is_valid():
-            branch = form.save()
-            return redirect('dashboard')
-    else:
-        form = BranchForm()
-    return render(request, 'register_branch.html', {'form': form})
-
-def register_worker(request):
-    if request.method == 'POST':
-        form = WorkerForm(request.POST)
-        if form.is_valid():
-            worker = form.save()
-            return redirect('dashboard')
-    else:
-        form = WorkerForm()
-    return render(request, 'register_worker.html', {'form': form})
-
-
-def unregister_worker(request, worker_id):
-    worker = Worker.objects.get(id=worker_id)
-    if request.method == 'POST':
-        worker.delete()
-        return redirect('dashboard')
-    return render(request, 'unregister_worker.html', {'worker': worker})
-
+@login_required
 def dashboard(request):
-    branches = Branch.objects.all()
-    workers = Worker.objects.all()
-    reports = ItemReport.objects.all()
+    # Ensure request.user is a Manager instance
+    if not isinstance(request.user, Manager):
+        return redirect('login')  # Redirect to login if the user is not a manager
+
+    branches = Branch.objects.filter(manager=request.user)
+    workers = Worker.objects.filter(branch__in=branches)
+    reports = ItemReport.objects.filter(item__worker__branch__in=branches)
+    best_selling_items = get_best_selling_items(branches)
 
     for branch in branches:
         branch.profit_loss = calculate_profit_loss(branch)
         branch.graph = draw_profit_loss_graph(branch)
 
-    best_selling_items = get_best_selling_items()
-
     return render(request, 'dashboard.html', {'branches': branches, 'workers': workers, 'reports': reports, 'best_selling_items': best_selling_items})
 
+@login_required
+def register_branch(request):
+    if request.method == 'POST':
+        form = BranchForm(request.POST)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.manager = request.user  # Ensure this is a Manager instance
+            branch.save()
+            return redirect('manager:dashboard')
+    else:
+        form = BranchForm()
+    return render(request, 'register_branch.html', {'form': form})
+
+@login_required
+def register_worker(request):
+    if request.method == 'POST':
+        form = WorkerForm(request.POST)
+        if form.is_valid():
+            worker = form.save()
+            return redirect('manager:dashboard')
+    else:
+        form = WorkerForm()
+    return render(request, 'register_worker.html', {'form': form})
+
+@login_required
+def unregister_worker(request, worker_id):
+    worker = Worker.objects.get(id=worker_id)
+    if request.method == 'POST':
+        worker.delete()
+        return redirect('manager:dashboard')
+    return render(request, 'unregister_worker.html', {'worker': worker})
+
+@login_required
 def branch_reports(request, branch_id):
     branch = Branch.objects.get(id=branch_id)
     reports = ItemReport.objects.filter(item__worker__branch=branch)
@@ -74,7 +73,7 @@ def calculate_profit_loss(branch):
     
     total_income = total_incomegained - total_incomespent
 
-    if total_income >total_expenditures:
+    if total_income > total_expenditures:
         return 'Profit'
     elif total_income < total_expenditures:
         return 'Loss'
@@ -86,9 +85,10 @@ def draw_profit_loss_graph(branch):
     dates = [report.date for report in reports]
     income_gained = [report.incomegained for report in reports]
     income_spent = [report.incomespent for report in reports]
-    total_income = [report.income for report in reports]  # Difference between income_gained and income_spent
+    total_income = [gained - spent for gained, spent in zip(income_gained, income_spent)]
     expenditures = [report.expenditures for report in reports]
 
+    plt.figure(figsize=(10, 5))
     plt.plot(dates, total_income, label='Net Income')
     plt.plot(dates, expenditures, label='Expenditures')
     plt.xlabel('Date')
@@ -96,7 +96,6 @@ def draw_profit_loss_graph(branch):
     plt.title('Profit/Loss Trend')
     plt.legend()
 
-    # Convert the graph to base64 for embedding in HTML
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
@@ -106,12 +105,13 @@ def draw_profit_loss_graph(branch):
 
     return graph
 
-def get_best_selling_items():
-    items = Item.objects.all()
+def get_best_selling_items(branches):
+    items = Item.objects.filter(worker__branch__in=branches)
     best_selling_items = []
-    # Example: assume best selling items are the ones with highest sales
+
     for item in items:
-        total_sales = sum([report.present for report in item.Itemreport_set.all()])
+        total_sales = sum([report.present for report in item.itemreport_set.all()])
         best_selling_items.append((item, total_sales))
+    
     best_selling_items.sort(key=lambda x: x[1], reverse=True)
-    return best_selling_items[:5]  # Return top 5 best selling items
+    return best_selling_items[:5]

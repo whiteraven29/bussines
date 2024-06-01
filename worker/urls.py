@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
 
+app_name='worker'
+
 urlpatterns = [
-    path('', views.worker_dashboard, name='worker_dashboard'),
+    path('worker_dashboard/', views.worker_dashboard, name='worker_dashboard'),
     path('register-item', views.register_item, name='register_item'),
     path('fill-report',views.fill_report,name='fill_report'),
     path('update-item <int:item_id>', views.update_item, name='update_item'),
