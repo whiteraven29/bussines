@@ -3,10 +3,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db import models
-from django.conf import settings
-from django.core.exceptions import ValidationError
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
@@ -32,7 +28,7 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, username, password, **extra_fields)
 
-class Manager(AbstractBaseUser, PermissionsMixin):
+class Manager(AbstractBaseUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=30, unique=True)
     firstname = models.CharField(max_length=100)

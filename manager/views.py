@@ -6,9 +6,11 @@ from worker.models import Worker, ItemReport, Item
 from .forms import BranchForm, ManagerSignupForm
 from worker.forms import WorkerForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
+from django.contrib.auth.models import Group
 
 @login_required
 def dashboard(request):
@@ -45,7 +47,16 @@ def register_worker(request):
     if request.method == 'POST':
         form = WorkerForm(request.POST)
         if form.is_valid():
-            worker = form.save()
+            worker = form.save(commit=False)
+            password = form.cleaned_data['password']
+            # Hash the password
+            worker.set_password(password)
+            worker.save()
+            
+            # Assign the user to the 'worker' group
+            worker_group = Group.objects.get(name='worker')
+            worker.groups.add(worker_group)
+
             return redirect('manager:dashboard')
     else:
         form = WorkerForm()

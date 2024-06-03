@@ -2,46 +2,53 @@ from django.shortcuts import render, redirect
 from .models import Worker,Item, ItemReport
 from .forms import WorkerForm, ItemForm,ItemRegistrationForm
 from django.contrib.auth.decorators import login_required
+import logging
+
+logger=logging.getLogger(__name__)
 
 
 @login_required
 def worker_dashboard(request):
-    worker = request.user.worker
+    worker = request.user
     reports = ItemReport.objects.filter(item__worker=worker)
     items = Item.objects.all()
-    return render(request, 'worker:worker_dashboard.html', {'reports': reports, 'items': items})
+    return render(request, 'worker_dashboard.html', {'reports': reports, 'items': items})
 
 @login_required
 def register_item(request):
     if request.method == 'POST':
         form = ItemRegistrationForm(request.POST)
         if form.is_valid():
-            # Get the current logged-in user
             user = request.user
-            # Check if the user is a worker
-            if user.groups.filter(name='worker').exists():
-                # Get the worker associated with the user
-                worker = user.worker
-                # Associate the item with the worker
-                item = form.save(commit=False)
-                item.worker = worker
-                item.save()
-                return redirect('worker:worker_dashboard')
-            else:
-                # If user is not a worker, redirect to error page
+            logger.debug(f"User ID: {user.id}, Username: {user.username}")
+            logger.debug(f"User Groups: {[group.name for group in user.groups.all()]}")
+
+            try:
+                worker = Worker.objects.get(id=user.id)
+            except Worker.DoesNotExist:
+                logger.error(f"Worker with user ID {user.id} does not exist.")
+                return render(request, 'error.html', {'message': 'You are not a registered worker.'})
+
+            if not user.groups.filter(name='worker').exists():
+                logger.error(f"User ID {user.id} is not in the 'worker' group.")
                 return render(request, 'error.html', {'message': 'You are not authorized to register items.'})
+
+            item = form.save(commit=False)
+            item.worker = worker
+            item.save()
+            return redirect('worker:worker_dashboard')
     else:
         form = ItemRegistrationForm()
 
-    return render(request, 'worker:register_item.html', {'form': form})
+    return render(request, 'register_item.html', {'form': form})
 
 @login_required
 def fill_report(request):
     if request.method == 'POST':
         form = ItemForm(request.POST)
         if form.is_valid():
-            item_name = form.cleaned_data['item_name']
-            last_stock = form.cleaned_data['last_stock']
+            item = form.cleaned_data['item']
+            laststock = form.cleaned_data['laststock']
             present = form.cleaned_data['present']
             consumed = form.cleaned_data['consumed']
             entered = form.cleaned_data['entered']
@@ -49,15 +56,13 @@ def fill_report(request):
             incomespent = form.cleaned_data['incomespent']
             incomegained = form.cleaned_data['incomegained']
             expenditures = form.cleaned_data['expenditures']
-            date = form.cleaned_data['date']
-
+            
             # Check if the item exists
-            item, created = Item.objects.get_or_create(name=item_name)
-
+            item, created = Item.objects.get_or_create(name=item)
             # Create ItemReport instance
             report = ItemReport(
                 item=item,
-                laststock=last_stock,
+                laststock=laststock,
                 present=present,
                 consumed=consumed,
                 entered=entered,
@@ -65,7 +70,7 @@ def fill_report(request):
                 incomespent=incomespent,
                 incomegained=incomegained,
                 expenditures=expenditures,
-                date=date
+                
             )
             report.save()
 
@@ -74,7 +79,7 @@ def fill_report(request):
     else:
         form = ItemForm()
 
-    return render(request, 'worker:fill_report.html', {'form': form})
+    return render(request, 'fill_report.html', {'form': form})
 
 @login_required
 def update_item(request, item_id):
@@ -83,15 +88,15 @@ def update_item(request, item_id):
         form = ItemForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            return redirect('worker:worker_dashboard')
+            return redirect('worker_dashboard')
     else:
         form = ItemForm(instance=item)
-    return render(request, 'worker:update_item.html', {'form': form, 'item': item})
+    return render(request, 'update_item.html', {'form': form, 'item': item})
 
 @login_required
 def delete_item(request, item_id):
     item = Item.objects.get(id=item_id)
     if request.method == 'POST':
         item.delete()
-        return redirect('worker:worker_dashboard')
-    return render(request, 'worker:delete_item.html', {'item': item})
+        return redirect('worker_dashboard')
+    return render(request, 'delete_item.html', {'item': item})
