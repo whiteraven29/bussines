@@ -9,7 +9,17 @@
     <h1>{{ branch.name }} Reports</h1>
     <ul>
         {% for report in reports %}
-            <li>{{ report.worker.firstname }} {{ report.worker.lastname }} - {{ report.date }}</li>
+            <li>{{ report.item.worker.first_name }} {{ report.item.worker.last_name }} - {{ report.date }}</li>
+                <strong>Date:</strong> {{ report.date }}<br>
+                <strong>Item:</strong> {{ report.item.name }}<br>
+                <strong>Last Stock:</strong> {{ report.laststock }}<br>
+                <strong>Present:</strong> {{ report.present }}<br>
+                <strong>Consumed:</strong> {{ report.consumed }}<br>
+                <strong>Entered:</strong> {{ report.entered }}<br>
+                <strong>Remaining:</strong> {{ report.remaining }}<br>
+                <strong>Income Spent:</strong> {{ report.incomespent }}<br>
+                <strong>Income Gained:</strong> {{ report.incomegained }}<br>
+                <strong>Expenditures:</strong> {{ report.expenditures }}<br>
         {% endfor %}
     </ul>
     <a href="{% url 'manager:dashboard' %}">Back to Dashboard</a>

@@ -10,8 +10,8 @@ logger=logging.getLogger(__name__)
 @login_required
 def worker_dashboard(request):
     worker = request.user
-    reports = ItemReport.objects.filter(item__worker=worker)
-    items = Item.objects.all()
+    items = Item.objects.filter(worker=worker)  # Filter items by the logged-in worker
+    reports = ItemReport.objects.filter(item__worker=worker)  # Filter reports by the logged-in worker
     return render(request, 'worker_dashboard.html', {'reports': reports, 'items': items})
 
 @login_required
