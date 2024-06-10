@@ -6,30 +6,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
     <a href="{%url 'home'%}">HOME</a>
     <h1>{% trans "Manager Dashboard" %}</h1>
-    <ul>
+    <h2>{% trans "Branches" %}</h2>
+    <a href="{% url 'manager:register_branch' %}"><button>{% trans "Register Branch" %}</button></a>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
         {% for branch in branches %}
-            <li>{{ branch.name }} - <a href="{% url 'manager:branch_reports' branch.id %}">{% trans "Report" %}</a></li>
-            <img src="data:image/png;base64,{{ branch.graph }}" alt="{% trans "Profit/Loss Graph" %}">
+        <tr>
+            <td>{{ branch.name }}</td>
+            <td><a href="{% url 'manager:branch_reports' branch.id %}">{% trans "Report" %}</a></td>
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
     <h2>{% trans "Workers" %}</h2>
-    <ul>
+    <a href="{% url 'manager:register_worker' %}"><button>{% trans "Register Worker" %}</button></a>
+    <table>
+        <tr>
+            <th>Names</th>
+            <th>Actions</th>
+        </tr>
         {% for worker in workers %}
-            <li>{{ worker.first_name }} {{ worker.last_name }}</li>
-            <a href="{% url 'manager:unregister_worker' worker.id %}">{% trans "Unregister" %}</a>
+        <tr>
+            <td>{{ worker.first_name }} {{ worker.last_name }}</td>
+            <td><a href="{% url 'manager:unregister_worker' worker.id %}">{% trans "Unregister" %}</a></td>
+        </tr>  
         {% endfor %}
-    </ul>
-    <h2>{% trans "Reports" %}</h2>
-    <ul>
-        {% for report in reports %}
-            <li>{{ report.worker.first_name }} {{ report.worker.last_name }} - {{ report.date }}</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'manager:register_branch' %}">{% trans "Register Branch" %}</a>
-    <a href="{% url 'manager:register_worker' %}">{% trans "Register Worker" %}</a>
+    
+    
 </body>
 </html>

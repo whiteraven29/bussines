@@ -4,24 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Worker Dashboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
     <h1>Worker Dashboard</h1>
-    <h2>Reports</h2>
-    <ul>
-        {% for report in reports %}
-            <li>{{ report.date }} - Last Stock: {{ report.laststock }}</li>
-        {% endfor %}
-    </ul>
+    <a href="{% url 'worker:register_item' %}"><button>REGISTER ITEM</button></a>
     <h2>Items</h2>
-    <a href="{% url 'worker:register_item' %}">Register Item</a>
-    <ul>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Fill Report</th>
+            <th>Update</th>
+            <th>Delete</th>
+        </tr>
         {% for item in items %}
-            <li>{{ item.name }}</li>
-            <a href="{% url 'worker:update_item' item.id %}">Update</a> 
-            <a href="{% url 'worker:delete_item' item.id %}">Delete</a>
+        <tr>
+            <td>{{ item.name }}</td>
+            <td><a href="{% url 'worker:fill_report' %}"><button>Fill Report</button></a></td>
+            <td><a href="{% url 'worker:update_item' item.id %}"><button>UPDATE</button></a></td>
+            <td><a href="{% url 'worker:delete_item' item.id %}"><button>DELETE</button></a></td>
+            
+        </tr>
         {% endfor %}
-    </ul>
-    <a href="{% url 'worker:fill_report' %}"><button>Fill Report</button></a>
+    </table>
+    
 </body>
 </html>

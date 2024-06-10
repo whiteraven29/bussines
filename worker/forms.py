@@ -16,4 +16,10 @@ class ItemRegistrationForm(forms.ModelForm):
 class ItemForm(forms.ModelForm):
     class Meta:
         model = ItemReport
-        fields = ['item','laststock', 'present', 'consumed', 'entered', 'remaining', 'incomespent','incomegained', 'expenditures']
+        fields = ['item', 'laststock', 'present', 'consumed', 'entered', 'remaining', 'incomespent', 'incomegained', 'expenditures']
+
+    def __init__(self, *args, **kwargs):
+        worker = kwargs.pop('worker', None)
+        super(ItemForm, self).__init__(*args, **kwargs)
+        if worker:
+            self.fields['item'].queryset = Item.objects.filter(worker=worker)

@@ -4,24 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ branch.name }} Reports</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
     <h1>{{ branch.name }} Reports</h1>
+
+    <h2>Worker</h2>
     <ul>
-        {% for report in reports %}
-            <li>{{ report.item.worker.first_name }} {{ report.item.worker.last_name }} - {{ report.date }}</li>
-                <strong>Date:</strong> {{ report.date }}<br>
-                <strong>Item:</strong> {{ report.item.name }}<br>
-                <strong>Last Stock:</strong> {{ report.laststock }}<br>
-                <strong>Present:</strong> {{ report.present }}<br>
-                <strong>Consumed:</strong> {{ report.consumed }}<br>
-                <strong>Entered:</strong> {{ report.entered }}<br>
-                <strong>Remaining:</strong> {{ report.remaining }}<br>
-                <strong>Income Spent:</strong> {{ report.incomespent }}<br>
-                <strong>Income Gained:</strong> {{ report.incomegained }}<br>
-                <strong>Expenditures:</strong> {{ report.expenditures }}<br>
+        {% for worker in workers %}
+            <li>{{ worker.first_name }} {{ worker.last_name }}</li>
         {% endfor %}
     </ul>
+
+    <h2>Reports</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Last Stock</th>
+                <th>Present</th>
+                <th>Consumed</th>
+                <th>Entered</th>
+                <th>Remaining</th>
+                <th>Income Spent</th>
+                <th>Income Gained</th>
+                <th>Expenditures</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.date }}</td>
+                <td>{{ report.item.name }}</td>
+                <td>{{ report.laststock }}</td>
+                <td>{{ report.present }}</td>
+                <td>{{ report.consumed }}</td>
+                <td>{{ report.entered }}</td>
+                <td>{{ report.remaining }}</td>
+                <td>{{ report.incomespent }}</td>
+                <td>{{ report.incomegained }}</td>
+                <td>{{ report.expenditures }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Profit/Loss Graph</h2>
+    <form method="get">
+        <button type="submit" name="time_period" value="daily">Daily</button>
+        <button type="submit" name="time_period" value="weekly">Weekly</button>
+        <button type="submit" name="time_period" value="monthly">Monthly</button>
+        <button type="submit" name="time_period" value="yearly">Yearly</button>
+    </form>
+    {% if graph %}
+        <img src="data:image/png;base64,{{ graph }}" alt="Profit/Loss Graph">
+    {% endif %}
+
+    <h2>Best Selling Items</h2>
+    <form method="get">
+        <button type="submit" name="generate_best_selling" value="true">Generate Best Selling Items</button>
+    </form>
+    {% if best_selling_items %}
+        <ul>
+            {% for item, total_sales in best_selling_items %}
+                <li>{{ item.name }}: {{ total_sales }} sales</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
     <a href="{% url 'manager:dashboard' %}">Back to Dashboard</a>
 </body>
 </html>

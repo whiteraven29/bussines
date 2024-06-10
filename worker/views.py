@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Worker,Item, ItemReport
 from .forms import WorkerForm, ItemForm,ItemRegistrationForm
 from django.contrib.auth.decorators import login_required
@@ -47,39 +47,27 @@ def fill_report(request):
     if request.method == 'POST':
         form = ItemForm(request.POST)
         if form.is_valid():
-            item = form.cleaned_data['item']
-            laststock = form.cleaned_data['laststock']
-            present = form.cleaned_data['present']
-            consumed = form.cleaned_data['consumed']
-            entered = form.cleaned_data['entered']
-            remaining = form.cleaned_data['remaining']
-            incomespent = form.cleaned_data['incomespent']
-            incomegained = form.cleaned_data['incomegained']
-            expenditures = form.cleaned_data['expenditures']
-            
-            # Check if the item exists
-            item, created = Item.objects.get_or_create(name=item)
-            # Create ItemReport instance
-            report = ItemReport(
-                item=item,
-                laststock=laststock,
-                present=present,
-                consumed=consumed,
-                entered=entered,
-                remaining=remaining,
-                incomespent=incomespent,
-                incomegained=incomegained,
-                expenditures=expenditures,
-                
-            )
+            report = form.save(commit=False)
+            report.item.worker = request.user  # Assign the item's worker as the logged-in user
             report.save()
-
-            # Redirect to a success page or do whatever is needed
-            return redirect('worker:worker_dashboard')  # Change 'success_page' to the appropriate URL name
+            return redirect('worker:worker_dashboard')
     else:
-        form = ItemForm()
+        # Filter items based on the logged-in worker
+        items = Item.objects.filter(worker=request.user)
 
-    return render(request, 'fill_report.html', {'form': form})
+        item_id = request.GET.get('item_id')
+        if item_id:
+            item = get_object_or_404(Item, pk=item_id)
+            last_report = ItemReport.objects.filter(item=item).order_by('-date').first()
+            reports = ItemReport.objects.filter(item=item).order_by('-date')
+        else:
+            item = None
+            last_report = None
+            reports = None
+
+        form = ItemForm(initial={'item': item}, worker=request.user)  # Pass the worker to the form
+
+    return render(request, 'fill_report.html', {'form': form, 'items': items, 'last_report': last_report, 'reports': reports})
 
 @login_required
 def update_item(request, item_id):
