@@ -62,6 +62,10 @@
             {% endfor %}
         </tbody>
     </table>
+    <h2>Download Reports</h2>
+    <form method="get">
+        <button type="submit" name="download_report">Download Reports</button>
+    </form>
 
     <h2>Profit/Loss Graph</h2>
     <form method="get">
@@ -72,6 +76,10 @@
     </form>
     {% if graph %}
         <img src="data:image/png;base64,{{ graph }}" alt="Profit/Loss Graph">
+        <form method="get">
+            <input type="hidden" name="download_graph" value="true">
+            <button type="submit">Download Graph</button>
+        </form>
     {% endif %}
 
     <h2>Best Selling Items</h2>

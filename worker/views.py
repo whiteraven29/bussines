@@ -3,6 +3,8 @@ from .models import Worker,Item, ItemReport
 from .forms import WorkerForm, ItemForm,ItemRegistrationForm
 from django.contrib.auth.decorators import login_required
 import logging
+from django.utils import timezone
+from datetime import timedelta
 
 logger=logging.getLogger(__name__)
 
@@ -11,8 +13,28 @@ logger=logging.getLogger(__name__)
 def worker_dashboard(request):
     worker = request.user
     items = Item.objects.filter(worker=worker)  # Filter items by the logged-in worker
-    reports = ItemReport.objects.filter(item__worker=worker)  # Filter reports by the logged-in worker
-    return render(request, 'worker_dashboard.html', {'reports': reports, 'items': items})
+    reports=ItemReport.objects.filter(item__worker=worker)
+    latest_reports = []
+    daily_reports = []
+
+    if 'latest_reports' in request.GET:
+        for item in items:
+            try:
+                latest_report = ItemReport.objects.filter(item=item).latest('date')
+                latest_reports.append(latest_report)
+            except ItemReport.DoesNotExist:
+                continue  # Skip if no report exists for this item
+
+    if 'daily_reports' in request.GET:
+        today = timezone.now().date()
+        daily_reports = ItemReport.objects.filter(item__worker=worker, date=today)
+
+    return render(request, 'worker_dashboard.html', {
+        'reports':reports,
+        'items': items,
+        'latest_reports': latest_reports,
+        'daily_reports': daily_reports
+    })
 
 @login_required
 def register_item(request):

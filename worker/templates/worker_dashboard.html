@@ -17,11 +17,21 @@
         th {
             background-color: #f2f2f2;
         }
+        .button-container {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Worker Dashboard</h1>
+    
+    <div class="button-container">
+        <a href="?latest_reports=true"><button>Show Latest Info</button></a>
+        <a href="?daily_reports=true"><button>Show Day-to-Day Info</button></a>
+    </div>
+
     <a href="{% url 'worker:register_item' %}"><button>REGISTER ITEM</button></a>
+
     <h2>Items</h2>
     <table>
         <tr>
@@ -36,10 +46,72 @@
             <td><a href="{% url 'worker:fill_report' %}"><button>Fill Report</button></a></td>
             <td><a href="{% url 'worker:update_item' item.id %}"><button>UPDATE</button></a></td>
             <td><a href="{% url 'worker:delete_item' item.id %}"><button>DELETE</button></a></td>
-            
         </tr>
         {% endfor %}
     </table>
     
+    {% if latest_reports %}
+    <h2>Latest Reports</h2>
+    <table>
+        <tr>
+            <th>Item</th>
+            <th>Date</th>
+            <th>Last Stock</th>
+            <th>Present</th>
+            <th>Consumed</th>
+            <th>Entered</th>
+            <th>Remaining</th>
+            <th>Income Spent</th>
+            <th>Income Gained</th>
+            <th>Expenditures</th>
+        </tr>
+        {% for report in latest_reports %}
+        <tr>
+            <td>{{ report.item.name }}</td>
+            <td>{{ report.date }}</td>
+            <td>{{ report.laststock }}</td>
+            <td>{{ report.present }}</td>
+            <td>{{ report.consumed }}</td>
+            <td>{{ report.entered }}</td>
+            <td>{{ report.remaining }}</td>
+            <td>{{ report.incomespent }}</td>
+            <td>{{ report.incomegained }}</td>
+            <td>{{ report.expenditures }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    
+    {% if daily_reports %}
+    <h2>Day-to-Day Reports</h2>
+    <table>
+        <tr>
+            <th>Item</th>
+            <th>Date</th>
+            <th>Last Stock</th>
+            <th>Present</th>
+            <th>Consumed</th>
+            <th>Entered</th>
+            <th>Remaining</th>
+            <th>Income Spent</th>
+            <th>Income Gained</th>
+            <th>Expenditures</th>
+        </tr>
+        {% for report in daily_reports %}
+        <tr>
+            <td>{{ report.item.name }}</td>
+            <td>{{ report.date }}</td>
+            <td>{{ report.laststock }}</td>
+            <td>{{ report.present }}</td>
+            <td>{{ report.consumed }}</td>
+            <td>{{ report.entered }}</td>
+            <td>{{ report.remaining }}</td>
+            <td>{{ report.incomespent }}</td>
+            <td>{{ report.incomegained }}</td>
+            <td>{{ report.expenditures }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
 </body>
 </html>
