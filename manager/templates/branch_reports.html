@@ -62,6 +62,10 @@
             {% endfor %}
         </tbody>
     </table>
+    <form method="get">
+        <button type="submit" name="get_yesterday" value="true">Retrieve Yesterday's Info</button>
+    </form>
+
     <h2>Download Reports</h2>
     <form method="get">
         <button type="submit" name="download_report">Download Reports</button>
@@ -80,6 +84,17 @@
             <input type="hidden" name="download_graph" value="true">
             <button type="submit">Download Graph</button>
         </form>
+    {% endif %}
+
+    <h2>Summary Report</h2>
+    <form method="get">
+        <button type="submit" name="summary_period" value="weekly">Weekly Summary</button>
+        <button type="submit" name="summary_period" value="monthly">Monthly Summary</button>
+    </form>
+    {% if summary_data %}
+        <p>Total Income Spent: {{ summary_data.total_income_spent }}</p>
+        <p>Total Income Gained: {{ summary_data.total_income_gained }}</p>
+        <p>Profit/Loss Status: {{ summary_data.profit_loss_status }}</p>
     {% endif %}
 
     <h2>Best Selling Items</h2>

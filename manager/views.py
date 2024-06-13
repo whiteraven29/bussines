@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group
 from .utility import calculate_profit_loss, draw_profit_loss_graph,get_best_selling_items,download_report,download_graph
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.db.models import Sum
 
 
 
@@ -95,6 +96,8 @@ def branch_reports(request, branch_id):
     
     time_period = request.GET.get('time_period', None)
     generate_best_selling = request.GET.get('generate_best_selling', None)
+    get_yesterday = request.GET.get('get_yesterday', None)
+    summary_period = request.GET.get('summary_period', None)
 
     # Generate graph based on selected time period
     time_period = request.GET.get('time_period', 'weekly')  # Default to weekly
@@ -103,6 +106,7 @@ def branch_reports(request, branch_id):
         branch_id = request.GET.get('branch_id')
         branch = Branch.objects.get(id=branch_id)
         graph = draw_profit_loss_graph(branch, time_period)
+        generate_best_selling = request.GET.get('generate_best_selling', None)
 
     
     
@@ -119,6 +123,40 @@ def branch_reports(request, branch_id):
     if request.GET.get('download_graph'):
         if graph:
             return download_graph(graph) 
+        
+    if get_yesterday:
+        yesterday = timezone.now().date() - timedelta(days=1)
+        reports = reports.filter(date=yesterday)  
+
+    summary_data = None
+    if summary_period in ['weekly', 'monthly']:
+        now = timezone.now().date()
+        if summary_period == 'weekly':
+            start_date = now - timedelta(weeks=1)
+        else:
+            start_date = now - timedelta(days=30)
+
+        summarized_reports = reports.filter(date__gte=start_date)
+        total_income_spent = summarized_reports.aggregate(Sum('incomespent'))['incomespent__sum'] or 0
+        total_income_gained = summarized_reports.aggregate(Sum('incomegained'))['incomegained__sum'] or 0
+        total_expenditures = summarized_reports.aggregate(Sum('expenditures'))['expenditures__sum'] or 0
+        
+        total_income = total_income_gained - total_income_spent
+        if total_income > total_expenditures:
+            profit_loss_status = 'Profit'
+        elif total_income < total_expenditures:
+            profit_loss_status = 'Loss'
+        else:
+            profit_loss_status = 'Neutral'
+        
+        summary_data = {
+            'total_income_spent': total_income_spent,
+            'total_income_gained': total_income_gained,
+            'profit_loss_status': profit_loss_status
+        }
+   
+        
+        
 
     return render(request, 'branch_reports.html', {
         'branch': branch,
@@ -126,6 +164,8 @@ def branch_reports(request, branch_id):
         'graph': graph,
         'workers': workers,
         'best_selling_items': best_selling_items,
-        'time_period': time_period
+        'time_period': time_period,
+        'summary_data':summary_data,
+        'summary_period':summary_period
     })
 

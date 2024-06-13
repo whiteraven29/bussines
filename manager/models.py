@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
         if not email:
@@ -40,7 +41,6 @@ class Manager(AbstractBaseUser):
     REQUIRED_FIELDS = ['email']
 
     objects = CustomUserManager()
-
     def __str__(self):
         return self.email
 
