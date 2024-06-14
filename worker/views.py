@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Worker,Item, ItemReport
-from .forms import WorkerForm, ItemForm,ItemRegistrationForm
+from .forms import  ItemForm,ItemRegistrationForm
 from django.contrib.auth.decorators import login_required
 import logging
 from django.utils import timezone

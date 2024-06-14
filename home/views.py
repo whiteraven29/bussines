@@ -6,6 +6,9 @@ from worker.models import Worker as WorkerWorker
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -27,25 +30,18 @@ def manager_signup(request):
             lastname = form.cleaned_data['lastname']
             username = form.cleaned_data['username']
             email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-
-            # Check if email is a Gmail address
-            if not email.endswith('@gmail.com'):
-                form.add_error('email', 'Please use a valid Gmail address')
-                return render(request, 'manager_signup.html', {'manager_signup_form': form})
-
-            # Check password requirements
-            if len(password) < 8 or not any(char.isdigit() for char in password) or not any(char.isalpha() for char in password):
-                form.add_error('password', 'Password must be at least 8 characters long and contain both letters and numbers')
-                return render(request, 'manager_signup.html', {'manager_signup_form': form})
-
+            password1 = form.cleaned_data['password1']
+            
             # Check if username or email already exists for manager
-            if ManagerWorker.objects.filter(username=username).exists() or ManagerWorker.objects.filter(email=email).exists():
-                form.add_error('username', 'Username or email already exists')
+            if ManagerWorker.objects.filter(username=username).exists():
+                form.add_error('username', 'Username already exists')
+                return render(request, 'manager_signup.html', {'manager_signup_form': form})
+            if ManagerWorker.objects.filter(email=email).exists():
+                form.add_error('email', 'Email already exists')
                 return render(request, 'manager_signup.html', {'manager_signup_form': form})
 
             # Hash the password
-            hashed_password = make_password(password)
+            hashed_password = make_password(password1)
 
             # Create manager user
             manager_user = ManagerWorker.objects.create(
@@ -54,15 +50,14 @@ def manager_signup(request):
                 username=username,
                 email=email,
                 password=hashed_password  # Save hashed password
+                
             )
 
-            return redirect('home')  # Redirect to login page after successful signup
-
+            return redirect('manager:dashboard')  # Redirect to login page after successful signup
     else:
         form = ManagerSignupForm()
 
     return render(request, 'manager_signup.html', {'manager_signup_form': form})
-
 
 def private_signup(request):
     if request.method == 'POST':
@@ -73,25 +68,19 @@ def private_signup(request):
             lastname = form.cleaned_data['lastname']
             username = form.cleaned_data['username']
             email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+            password1= form.cleaned_data['password1']
+            
 
-            # Check if email is a Gmail address
-            if not email.endswith('@gmail.com'):
-                form.add_error('email', 'Please use a valid Gmail address')
-                return render(request, 'private_signup.html', {'private_signup_form': form})
-
-            # Check password requirements
-            if len(password) < 8 or not any(char.isdigit() for char in password) or not any(char.isalpha() for char in password):
-                form.add_error('password', 'Password must be at least 8 characters long and contain both letters and numbers')
-                return render(request, 'private_signup.html', {'private_signup_form': form})
-
-            # Check if username or email already exists for private user
-            if PrivateWorker.objects.filter(username=username).exists() or PrivateWorker.objects.filter(email=email).exists():
-                form.add_error('username', 'Username or email already exists')
-                return render(request, 'private_signup.html', {'private_signup_form': form})
+            # Check if username or email already exists for manager
+            if PrivateWorker.objects.filter(username=username).exists():
+                form.add_error('username', 'Username already exists')
+                return render(request, 'manager_signup.html', {'manager_signup_form': form})
+            if PrivateWorker.objects.filter(email=email).exists():
+                form.add_error('email', 'Email already exists')
+                return render(request, 'manager_signup.html', {'manager_signup_form': form})
 
             # Hash the password
-            hashed_password = make_password(password)
+            hashed_password = make_password(password1)
 
             # Create private user
             private_user = PrivateWorker.objects.create(
@@ -99,11 +88,11 @@ def private_signup(request):
                 lastname=lastname,
                 username=username,
                 email=email,
-                password=hashed_password  # Save hashed password
+                password1=hashed_password  # Save hashed password
+                
             )
 
             return redirect('private_dashboard')  # Redirect to login page after successful signup
-
     else:
         form = PrivateSignupForm()
 
@@ -124,6 +113,7 @@ def login_view(request):
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)
+                    logger.debug(f"User {user.username} logged in successfully as {login_type}")
                     if login_type == 'manager':
                         return redirect('/manager/dashboard/')
                     elif login_type == 'worker':
@@ -131,8 +121,10 @@ def login_view(request):
                     elif login_type == 'private':
                         return redirect('/private/private_dashboard/')
                 else:
+                    logger.debug("User is inactive")
                     return HttpResponse("User is inactive")
             else:
+                logger.debug("Invalid login")
                 return HttpResponse("Invalid login")
     else:
         form = LoginForm()

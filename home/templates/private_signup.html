@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private User Sign Up</title>
+    <style>
+        .toggle-password {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h2>Private User Sign Up</h2>
@@ -37,8 +42,32 @@
         {{ private_signup_form.password }}
         {% if private_signup_form.password.errors %}
             <span class="error">{{ private_signup_form.password.errors }}</span>
+        {% endif %}<br>
+        <label for="id_confirm_password">Confirm Password:</label>
+        {{ private_signup_form.confirm_password }}
+        {% if private_signup_form.confirm_password.errors %}
+            <span class="error">{{ private_signup_form.confirm_password.errors }}</span>
         {% endif %}
-        <br>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const passwordFields = document.querySelectorAll('input[type="password"]');
+                passwordFields.forEach(field => {
+                    const toggle = document.createElement('span');
+                    toggle.textContent = '👁';
+                    toggle.classList.add('toggle-password');
+                    field.parentNode.appendChild(toggle);
+                    toggle.addEventListener('click', function () {
+                        if (field.type === 'password') {
+                            field.type = 'text';
+                            toggle.textContent = '🙈';
+                        } else {
+                            field.type = 'password';
+                            toggle.textContent = '👁';
+                        }
+                    });
+                });
+            });
+        </script><br>
         <button type="submit">Sign Up</button>
     </form>
 </body>

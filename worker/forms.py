@@ -2,12 +2,12 @@ from django import forms
 from .models import Worker,ItemReport,Item
 
 class WorkerForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+
     class Meta:
         model = Worker
         fields = ['username', 'first_name', 'last_name', 'email', 'password', 'branch']
-        widgets = {
-            'password': forms.PasswordInput(),
-        }
+
 class ItemRegistrationForm(forms.ModelForm):
     class Meta:
         model = Item

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Branch, Manager
 from worker.models import Worker, ItemReport, Item
-from .forms import BranchForm, ManagerSignupForm
+from .forms import BranchForm
 from worker.forms import WorkerForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -11,6 +11,7 @@ from .utility import calculate_profit_loss, draw_profit_loss_graph,get_best_sell
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Sum
+from django.db import IntegrityError
 
 
 
@@ -50,12 +51,25 @@ def register_branch(request):
     if request.method == 'POST':
         form = BranchForm(request.POST)
         if form.is_valid():
-            branch = form.save(commit=False)
-            branch.manager = request.user  # Ensure this is a Manager instance
-            branch.save()
-            return redirect('manager:dashboard')
+            branch_name = form.cleaned_data['name']
+            manager = request.user  # Assuming the manager is the logged-in user
+            
+            # Ensure that the manager exists
+            if not Manager.objects.filter(id=manager.id).exists():
+                form.add_error(None, 'Associated manager does not exist')
+                return render(request, 'register_branch.html', {'form': form})
+            
+            # Create the branch
+            branch = Branch(name=branch_name, manager=manager)
+            try:
+                branch.save()
+                return redirect('manager:dashboard')  # Redirect after successful registration
+            except IntegrityError:
+                form.add_error(None, 'A foreign key constraint failed. Please check the manager association.')
+                return render(request, 'register_branch.html', {'form': form})
     else:
         form = BranchForm()
+    
     return render(request, 'register_branch.html', {'form': form})
 
 @login_required
@@ -68,7 +82,7 @@ def register_worker(request):
             worker.set_password(password)  # Hash the password
             worker.save()
             
-            worker_group = Group.objects.get(name='worker')
+            worker_group, created = Group.objects.get_or_create(name='worker')
             worker.groups.add(worker_group)
 
             return redirect('manager:dashboard')

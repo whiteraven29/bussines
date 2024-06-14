@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
@@ -17,6 +17,11 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_manager(self, email, username, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self.create_user(email, username, password, **extra_fields)
+
     def create_superuser(self, email, username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -28,8 +33,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, username, password, **extra_fields)
-
-class Manager(AbstractBaseUser):
+    
+class Manager(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=30, unique=True)
     firstname = models.CharField(max_length=100)
@@ -41,6 +46,7 @@ class Manager(AbstractBaseUser):
     REQUIRED_FIELDS = ['email']
 
     objects = CustomUserManager()
+
     def __str__(self):
         return self.email
 
@@ -52,7 +58,6 @@ class Manager(AbstractBaseUser):
         self.clean()
         super().save(*args, **kwargs)
 
-
 class Branch(models.Model):
     name = models.CharField(max_length=100)
     manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='branches')
@@ -60,6 +65,3 @@ class Branch(models.Model):
     def __str__(self):
         return self.name
 
-class Worker(models.Model):
-    name = models.CharField(max_length=255)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)

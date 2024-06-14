@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <style>
+        .toggle-password {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>Custom Login</h1>
@@ -21,15 +26,33 @@
         <input type="text" id="login_username" name="login_username" required><br>
 
         <label for="login_password">Password:</label>
-        <input type="password" id="login_password" name="login_password" required><br>
-
+        <input type="password" id="login_password" name="login_password" required>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const passwordFields = document.querySelectorAll('input[type="password"]');
+                passwordFields.forEach(field => {
+                    const toggle = document.createElement('span');
+                    toggle.textContent = '👁';
+                    toggle.classList.add('toggle-password');
+                    field.parentNode.appendChild(toggle);
+                    toggle.addEventListener('click', function () {
+                        if (field.type === 'password') {
+                            field.type = 'text';
+                            toggle.textContent = '🙈';
+                        } else {
+                            field.type = 'password';
+                            toggle.textContent = '👁';
+                        }
+                    });
+                });
+            });
+        </script><br>
         <label for="login_type">Login As:</label>
         <select id="login_type" name="login_type">
             <option value="manager">Manager</option>
             <option value="private">Private</option>
             <option value="worker">Worker</option>
-        </select><br>
-
+        </select><br>  
         <button type="submit">Log In</button>
     </form>
 </body>

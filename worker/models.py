@@ -21,6 +21,9 @@ class Worker(AbstractUser):
         verbose_name='user permissions',
         help_text='Specific permissions for this user.',
     )
+
+    def manager_name(self):
+        return self.branch.manager.username if self.branch and self.branch.manager else 'No Manager'
     
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.branch.name})"
