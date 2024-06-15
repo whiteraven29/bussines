@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Sum
 from django.db import IntegrityError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -84,6 +87,9 @@ def register_worker(request):
             
             worker_group, created = Group.objects.get_or_create(name='worker')
             worker.groups.add(worker_group)
+            logger.debug(f"Worker {worker.username} registered successfully")
+            print(f"Worker {worker.username} registered successfully")
+
 
             return redirect('manager:dashboard')
     else:

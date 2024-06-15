@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 
 class CustomUserAuthBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
+        logger.debug(f"CustomUserAuthBackend authenticate called with username={username}")
+        print(f"CustomUserAuthBackend authenticate called with username={username}")
         if username is None or password is None:
             logger.debug("Username or password is None")
             return None

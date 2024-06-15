@@ -108,12 +108,16 @@ def login_view(request):
             login_password = form.cleaned_data['login_password']
             login_type = form.cleaned_data['login_type']
 
+            logger.debug(f"Login attempt for user: {login_username} with type: {login_type}")
+            print(f"Login attempt for user: {login_username} with type: {login_type}")
+
             user = authenticate(request, username=login_username, password=login_password)
 
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)
                     logger.debug(f"User {user.username} logged in successfully as {login_type}")
+                    print(f"User {login_username} authenticated successfully")
                     if login_type == 'manager':
                         return redirect('/manager/dashboard/')
                     elif login_type == 'worker':
@@ -122,9 +126,11 @@ def login_view(request):
                         return redirect('/private/private_dashboard/')
                 else:
                     logger.debug("User is inactive")
+                    print(f"User {login_username} is inactive")
                     return HttpResponse("User is inactive")
             else:
                 logger.debug("Invalid login")
+                print(f"Invalid login for user: {login_username}")
                 return HttpResponse("Invalid login")
     else:
         form = LoginForm()

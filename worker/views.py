@@ -4,7 +4,7 @@ from .forms import  ItemForm,ItemRegistrationForm
 from django.contrib.auth.decorators import login_required
 import logging
 from django.utils import timezone
-from datetime import timedelta
+from django.http import HttpResponse
 
 logger=logging.getLogger(__name__)
 
@@ -12,6 +12,9 @@ logger=logging.getLogger(__name__)
 @login_required
 def worker_dashboard(request):
     worker = request.user
+    if not isinstance(worker, Worker):
+        logger.error("Current user is not a worker: %s", worker)
+        return HttpResponse("User is not a worker")
     items = Item.objects.filter(worker=worker)  # Filter items by the logged-in worker
     reports=ItemReport.objects.filter(item__worker=worker)
     latest_reports = []

@@ -55,5 +55,7 @@
         </select><br>  
         <button type="submit">Log In</button>
     </form>
-</body>
+    {% if form.errors %}
+        <p style="color: red;">{{ form.errors }}</p>
+    {% endif %}
 </html>

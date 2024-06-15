@@ -7,7 +7,7 @@ from .models import Worker, Item, ItemReport
 class WorkerAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'branch')
     search_fields = ('first_name', 'last_name', 'branch__name')
-    list_filter = ('branch',)
+    list_filter = ('branch','groups')
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):

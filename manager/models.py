@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,Group,Permission
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
@@ -47,6 +47,22 @@ class Manager(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+    groups = models.ManyToManyField(
+        Group,
+        related_name='manager_set',  # Changed from 'user_set' to 'manager_set'
+        blank=True,
+        verbose_name='groups',
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='manager_user_permissions',  # Changed from 'user_set' to 'manager_user_permissions'
+        blank=True,
+        verbose_name='user permissions',
+        help_text='Specific permissions for this user.',
+    )
+
+
     def __str__(self):
         return self.email
 
@@ -60,7 +76,7 @@ class Manager(AbstractBaseUser, PermissionsMixin):
 
 class Branch(models.Model):
     name = models.CharField(max_length=100)
-    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='branches')
+    manager = models.ForeignKey(Manager, on_delete=models.CASCADE, related_name='branches')
 
     def __str__(self):
         return self.name

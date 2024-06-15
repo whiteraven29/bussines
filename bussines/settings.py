@@ -134,4 +134,3 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-AUTH_USER_MODEL = 'manager.Manager'
