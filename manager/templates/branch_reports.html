@@ -22,7 +22,7 @@
 <body>
     <h1>{{ branch.name }} Reports</h1>
 
-    <h2>Worker</h2>
+    <h2>Workers</h2>
     <ul>
         {% for worker in workers %}
             <li>{{ worker.first_name }} {{ worker.last_name }}</li>
@@ -36,13 +36,13 @@
                 <th>Date</th>
                 <th>Item</th>
                 <th>Last Stock</th>
-                <th>Present</th>
+                <th>Added Stock</th>
+                <th>Current Stock</th>
                 <th>Consumed</th>
-                <th>Entered</th>
                 <th>Remaining</th>
                 <th>Income Spent</th>
                 <th>Income Gained</th>
-                <th>Expenditures</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -51,13 +51,30 @@
                 <td>{{ report.date }}</td>
                 <td>{{ report.item.name }}</td>
                 <td>{{ report.laststock }}</td>
-                <td>{{ report.present }}</td>
+                <td>{{ report.addedstock }}</td>
+                <td>{{ report.currentstock }}</td>
                 <td>{{ report.consumed }}</td>
-                <td>{{ report.entered }}</td>
                 <td>{{ report.remaining }}</td>
                 <td>{{ report.incomespent }}</td>
                 <td>{{ report.incomegained }}</td>
-                <td>{{ report.expenditures }}</td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Daily Expenditures</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Expenditure</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expenditure in daily_expenditures %}
+            <tr>
+                <td>{{ expenditure.date }}</td>
+                <td>{{ expenditure.expenditure }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -73,10 +90,21 @@
 
     <h2>Profit/Loss Graph</h2>
     <form method="get">
-        <button type="submit" name="time_period" value="daily">Daily</button>
-        <button type="submit" name="time_period" value="weekly">Weekly</button>
-        <button type="submit" name="time_period" value="monthly">Monthly</button>
-        <button type="submit" name="time_period" value="yearly">Yearly</button>
+        <label for="graph_type">Graph Type:</label>
+        <select name="graph_type" id="graph_type">
+            <option value="overall">Overall Profit/Loss</option>
+            <option value="product">Product-wise Contribution</option>
+        </select>
+
+        <label for="time_period">Time Period:</label>
+        <select name="time_period" id="time_period">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+
+        <button type="submit" name="view_graph" value="true">View Graph</button>
     </form>
     {% if graph %}
         <img src="data:image/png;base64,{{ graph }}" alt="Profit/Loss Graph">
@@ -108,7 +136,6 @@
             {% endfor %}
         </ul>
     {% endif %}
-
 
     <a href="{% url 'manager:dashboard' %}">Back to Dashboard</a>
 </body>

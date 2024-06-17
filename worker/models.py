@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser,Group,Permission
 from manager.models import Branch
+from django.utils import timezone
 
 class Worker(AbstractUser):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='workers')
@@ -42,14 +43,24 @@ class Item(models.Model):
 class ItemReport(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     laststock = models.IntegerField(default=0)
-    present = models.IntegerField(default=0)
+    addedstock = models.IntegerField(default=0)
+    currentstock = models.IntegerField(default=0)
     consumed = models.IntegerField(default=0)
-    entered = models.IntegerField(default=0)
     remaining = models.IntegerField(default=0)
     incomespent = models.FloatField(default=0)
     incomegained = models.FloatField(default=0)
-    expenditures = models.FloatField(default=0)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
 
     def __str__(self):
         return f"Report for {self.item.name} on {self.date}"
+    
+class DailyExpenditure(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    date = models.DateField(default=timezone.now)
+    expenditure = models.FloatField()
+
+    class Meta:
+        unique_together = ('branch', 'date')
+
+    def __str__(self):
+        return f"{self.branch.name} - {self.date}: {self.expenditure}"    

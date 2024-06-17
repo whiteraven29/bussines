@@ -21,6 +21,45 @@
 </head>
 <body>
     <h1>Fill Report</h1>
+
+    {% if last_report %}
+    <h2>Last Report</h2>
+    <table>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Last Stock</td>
+            <td>{{ last_report.laststock }}</td>
+        </tr>
+        <tr>
+            <td>Present</td>
+            <td>{{ last_report.addedstock }}</td>
+        </tr>
+        <tr>
+            <td>Consumed</td>
+            <td>{{ last_report.currentstock }}</td>
+        </tr>
+        <tr>
+            <td>Entered</td>
+            <td>{{ last_report.consumed }}</td>
+        </tr>
+        <tr>
+            <td>Remaining</td>
+            <td>{{ last_report.remaining }}</td>
+        </tr>
+        <tr>
+            <td>Income Spent</td>
+            <td>{{ last_report.incomespent }}</td>
+        </tr>
+        <tr>
+            <td>Income Gained</td>
+            <td>{{ last_report.incomegained }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
         <table>
@@ -37,6 +76,6 @@
         </table>
         <button type="submit">Submit</button>
     </form>
+    <a href="{%url 'worker:worker_dashboard'%}">Back To Dashboard</a>
 </body>
 </html>
-

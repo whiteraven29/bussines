@@ -1,16 +1,38 @@
-<!-- In register_item.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register Item</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formContainer = document.querySelector('#form-container');
+            const addButton = document.querySelector('#add-form');
+            const totalForms = document.querySelector('#id_form-TOTAL_FORMS');
+
+            addButton.addEventListener('click', function() {
+                const currentFormCount = formContainer.children.length;
+                const newForm = formContainer.children[0].cloneNode(true);
+                const regex = new RegExp(`form-(\\d){1}-`, 'g');
+
+                newForm.innerHTML = newForm.innerHTML.replace(regex, `form-${currentFormCount}-`);
+                formContainer.appendChild(newForm);
+                totalForms.value = parseInt(totalForms.value) + 1;
+            });
+        });
+    </script>
 </head>
 <body>
-    <h2>Register Item</h2>
+    <h2>Register Items</h2>
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ formset.management_form }}
+        <div id="form-container">
+            {% for form in formset %}
+                <div>{{ form.as_p }}</div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-form">Add Another Item</button>
         <button type="submit">Register</button>
     </form>
 </body>

@@ -29,12 +29,14 @@
     <table>
         <tr>
             <th>Name</th>
-            <th>Actions</th>
+            <th>Report</th>
+            <th>Delete</th>
         </tr>
         {% for branch in branches %}
         <tr>
             <td>{{ branch.name }}</td>
             <td><a href="{% url 'manager:branch_reports' branch.id %}">{% trans "Report" %}</a></td>
+            <td><a href="{% url 'manager:delete_branch' branch.id %}"><button>DELETE</button></td>
         </tr>
         {% endfor %}
     </table>

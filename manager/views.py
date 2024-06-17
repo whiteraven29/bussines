@@ -1,13 +1,13 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.http import HttpResponse
 from .models import Branch, Manager
-from worker.models import Worker, ItemReport, Item
+from worker.models import Worker, ItemReport, Item,DailyExpenditure
 from .forms import BranchForm
 from worker.forms import WorkerForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
-from .utility import calculate_profit_loss, draw_profit_loss_graph,get_best_selling_items,download_report,download_graph
+from .utility import  overall_graph,product_graph,get_best_selling_items,download_report,download_graph
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Sum
@@ -22,15 +22,13 @@ logger = logging.getLogger(__name__)
 @login_required
 def dashboard(request):
     if not isinstance(request.user, Manager):
-        return redirect('login')  # Redirect to login if the user is not a manager
+        return redirect('home')  # Redirect to login if the user is not a manager
 
     branches = Branch.objects.filter(manager=request.user)
     workers = Worker.objects.filter(branch__in=branches)
     reports = ItemReport.objects.filter(item__worker__branch__in=branches)
 
-    for branch in branches:
-        branch.profit_loss = calculate_profit_loss(branch)
-
+    
     
     # Filter reports by date if requested
     selected_date = request.GET.get('date')
@@ -106,49 +104,39 @@ def unregister_worker(request, worker_id):
 
 @login_required
 def branch_reports(request, branch_id):
-    branch = Branch.objects.get(id=branch_id)
+    branch = get_object_or_404(Branch, id=branch_id)
     reports = ItemReport.objects.filter(item__worker__branch=branch)
     workers = Worker.objects.filter(branch=branch)  # Fetch workers for the specific branch
 
-
     graph = None
     best_selling_items = None
-    
-    time_period = request.GET.get('time_period', None)
-    generate_best_selling = request.GET.get('generate_best_selling', None)
-    get_yesterday = request.GET.get('get_yesterday', None)
-    summary_period = request.GET.get('summary_period', None)
 
-    # Generate graph based on selected time period
     time_period = request.GET.get('time_period', 'weekly')  # Default to weekly
-    graph = None
+    graph_type = request.GET.get('graph_type', 'overall')  # Default to overall profit/loss
+
     if 'view_graph' in request.GET:
-        branch_id = request.GET.get('branch_id')
-        branch = Branch.objects.get(id=branch_id)
-        graph = draw_profit_loss_graph(branch, time_period)
-        generate_best_selling = request.GET.get('generate_best_selling', None)
+        if graph_type == 'overall':
+            graph = overall_graph(branch, time_period)
+        elif graph_type == 'product':
+            graph = product_graph(branch, time_period)
+        else:
+            graph = None
 
-    
-    
-    
-    if time_period:
-        graph = draw_profit_loss_graph(branch, time_period)
-
-    if generate_best_selling:
+    if 'generate_best_selling' in request.GET:
         best_selling_items = get_best_selling_items([branch])
 
     if 'download_report' in request.GET:
-        return download_report(reports)   
+        return download_report(reports)
 
-    if request.GET.get('download_graph'):
-        if graph:
-            return download_graph(graph) 
-        
-    if get_yesterday:
+    if 'download_graph' in request.GET and graph:
+        return download_graph(graph)
+
+    if 'get_yesterday' in request.GET:
         yesterday = timezone.now().date() - timedelta(days=1)
-        reports = reports.filter(date=yesterday)  
+        reports = reports.filter(date=yesterday)
 
     summary_data = None
+    summary_period = request.GET.get('summary_period', None)
     if summary_period in ['weekly', 'monthly']:
         now = timezone.now().date()
         if summary_period == 'weekly':
@@ -159,24 +147,17 @@ def branch_reports(request, branch_id):
         summarized_reports = reports.filter(date__gte=start_date)
         total_income_spent = summarized_reports.aggregate(Sum('incomespent'))['incomespent__sum'] or 0
         total_income_gained = summarized_reports.aggregate(Sum('incomegained'))['incomegained__sum'] or 0
-        total_expenditures = summarized_reports.aggregate(Sum('expenditures'))['expenditures__sum'] or 0
-        
+        total_expenditures = DailyExpenditure.objects.filter(branch=branch, date__gte=start_date).aggregate(Sum('expenditure'))['expenditure__sum'] or 0
+
         total_income = total_income_gained - total_income_spent
-        if total_income > total_expenditures:
-            profit_loss_status = 'Profit'
-        elif total_income < total_expenditures:
-            profit_loss_status = 'Loss'
-        else:
-            profit_loss_status = 'Neutral'
-        
+        profit_loss_status = 'Profit' if total_income > total_expenditures else 'Loss' if total_income < total_expenditures else 'Neutral'
+
         summary_data = {
             'total_income_spent': total_income_spent,
             'total_income_gained': total_income_gained,
             'profit_loss_status': profit_loss_status
         }
-   
-        
-        
+    daily_expenditures=DailyExpenditure.objects.filter(branch=branch)    
 
     return render(request, 'branch_reports.html', {
         'branch': branch,
@@ -185,7 +166,15 @@ def branch_reports(request, branch_id):
         'workers': workers,
         'best_selling_items': best_selling_items,
         'time_period': time_period,
-        'summary_data':summary_data,
-        'summary_period':summary_period
+        'summary_data': summary_data,
+        'summary_period': summary_period,
+        'daily_expenditures':daily_expenditures,
     })
 
+@login_required
+def delete_branch(request, branch_id):
+    branch = Branch.objects.get(id=branch_id)
+    if request.method == 'POST':
+        branch.delete()
+        return redirect('manager:dashboard')
+    return render(request, 'delete_branch.html', {'branch': branch})

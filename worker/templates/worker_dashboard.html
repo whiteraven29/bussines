@@ -37,19 +37,20 @@
     <table>
         <tr>
             <th>Name</th>
-            <th>Fill Report</th>
             <th>Update</th>
             <th>Delete</th>
         </tr>
         {% for item in items %}
         <tr>
             <td>{{ item.name }}</td>
-            <td><a href="{% url 'worker:fill_report' %}"><button>Fill Report</button></a></td>
             <td><a href="{% url 'worker:update_item' item.id %}"><button>UPDATE</button></a></td>
             <td><a href="{% url 'worker:delete_item' item.id %}"><button>DELETE</button></a></td>
         </tr>
         {% endfor %}
     </table>
+
+    <a href="{% url 'worker:fill_report' %}"><button>Fill Report</button></a>
+    <a href="{% url 'worker:daily_expenditure' branch.id %}"><button>Record Daily Expenditure</button></a>
     
     {% if latest_reports %}
     <h2>Latest Reports</h2>
@@ -58,26 +59,26 @@
             <th>Item</th>
             <th>Date</th>
             <th>Last Stock</th>
-            <th>Present</th>
+            <th>AddedStock</th>
+            <th>Currentstock</th>
             <th>Consumed</th>
-            <th>Entered</th>
             <th>Remaining</th>
             <th>Income Spent</th>
             <th>Income Gained</th>
-            <th>Expenditures</th>
+            
         </tr>
         {% for report in latest_reports %}
         <tr>
             <td>{{ report.item.name }}</td>
             <td>{{ report.date }}</td>
             <td>{{ report.laststock }}</td>
-            <td>{{ report.present }}</td>
+            <td>{{ report.addedstock }}</td>
+            <td>{{ report.currentstock }}</td>
             <td>{{ report.consumed }}</td>
-            <td>{{ report.entered }}</td>
             <td>{{ report.remaining }}</td>
             <td>{{ report.incomespent }}</td>
             <td>{{ report.incomegained }}</td>
-            <td>{{ report.expenditures }}</td>
+            
         </tr>
         {% endfor %}
     </table>
@@ -96,7 +97,7 @@
             <th>Remaining</th>
             <th>Income Spent</th>
             <th>Income Gained</th>
-            <th>Expenditures</th>
+            
         </tr>
         {% for report in daily_reports %}
         <tr>
@@ -109,7 +110,7 @@
             <td>{{ report.remaining }}</td>
             <td>{{ report.incomespent }}</td>
             <td>{{ report.incomegained }}</td>
-            <td>{{ report.expenditures }}</td>
+            
         </tr>
         {% endfor %}
     </table>
