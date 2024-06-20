@@ -6,4 +6,7 @@ class BranchForm(forms.ModelForm):
         model = Branch
         fields = ['name']
 
+class DateSearchForm(forms.Form):
+    date=forms.DateField(widget=forms.DateInput(attrs={'type':'date'}), required=False)        
+
 

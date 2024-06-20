@@ -126,7 +126,7 @@ def get_best_selling_items(branches):
     best_selling_items = []
 
     for item in items:
-        total_sales = sum([report.present for report in item.itemreport_set.all()])
+        total_sales = sum([report.consumed for report in item.itemreport_set.all()])
         best_selling_items.append((item, total_sales))
     
     best_selling_items.sort(key=lambda x: x[1], reverse=True)

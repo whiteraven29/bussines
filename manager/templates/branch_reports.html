@@ -20,16 +20,22 @@
     </style>
 </head>
 <body>
-    <h1>{{ branch.name }} Reports</h1>
+    <h1>{{ branch.name }} Report</h1>
 
-    <h2>Workers</h2>
+    <h2>Worker</h2>
     <ul>
         {% for worker in workers %}
             <li>{{ worker.first_name }} {{ worker.last_name }}</li>
         {% endfor %}
     </ul>
 
-    <h2>Reports</h2>
+    <h2>Search Report by Date</h2>
+    <form method="get">
+        {{date_search_form.as_p}}
+        <button type="submit">Search</button>
+    </form>
+
+    <h2>Report {{selected_date}}</h2>
     <table>
         <thead>
             <tr>
@@ -62,7 +68,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2>Daily Expenditures</h2>
+    <h2>Daily Expenditures {{selected_date}}</h2>
     <table>
         <thead>
             <tr>
@@ -123,6 +129,7 @@
         <p>Total Income Spent: {{ summary_data.total_income_spent }}</p>
         <p>Total Income Gained: {{ summary_data.total_income_gained }}</p>
         <p>Profit/Loss Status: {{ summary_data.profit_loss_status }}</p>
+        <p>Profit/Loss Value:{{summary_data.profit_loss_value}}</p>
     {% endif %}
 
     <h2>Best Selling Items</h2>

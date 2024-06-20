@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect,get_object_or_404
 from django.http import HttpResponse
 from .models import Branch, Manager
 from worker.models import Worker, ItemReport, Item,DailyExpenditure
-from .forms import BranchForm
+from .forms import BranchForm,DateSearchForm
 from worker.forms import WorkerForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -102,17 +102,33 @@ def unregister_worker(request, worker_id):
         return redirect('manager:dashboard')
     return render(request, 'unregister_worker.html', {'worker': worker})
 
+
+
 @login_required
 def branch_reports(request, branch_id):
     branch = get_object_or_404(Branch, id=branch_id)
-    reports = ItemReport.objects.filter(item__worker__branch=branch)
+    today=timezone.now().date()
+    reports = ItemReport.objects.filter(item__worker__branch=branch, date=today)
     workers = Worker.objects.filter(branch=branch)  # Fetch workers for the specific branch
+    daily_expenditures=DailyExpenditure.objects.filter(branch=branch, date=today)
+    date_search_form= DateSearchForm(request.GET)
+    selected_date=None
+    
 
     graph = None
     best_selling_items = None
 
-    time_period = request.GET.get('time_period', 'weekly')  # Default to weekly
+    time_period = request.GET.get('time_period', 'daily')  # Default to weekly
     graph_type = request.GET.get('graph_type', 'overall')  # Default to overall profit/loss
+
+   
+
+    if date_search_form.is_valid():
+        selected_date=date_search_form.cleaned_data['date']
+        reports=reports.filter(date=selected_date)
+    if selected_date is None:
+        selected_date=timezone.now().date()    
+    
 
     if 'view_graph' in request.GET:
         if graph_type == 'overall':
@@ -134,6 +150,8 @@ def branch_reports(request, branch_id):
     if 'get_yesterday' in request.GET:
         yesterday = timezone.now().date() - timedelta(days=1)
         reports = reports.filter(date=yesterday)
+        daily_expenditures=daily_expenditures.filter(date=yesterday)
+        
 
     summary_data = None
     summary_period = request.GET.get('summary_period', None)
@@ -150,14 +168,23 @@ def branch_reports(request, branch_id):
         total_expenditures = DailyExpenditure.objects.filter(branch=branch, date__gte=start_date).aggregate(Sum('expenditure'))['expenditure__sum'] or 0
 
         total_income = total_income_gained - total_income_spent
-        profit_loss_status = 'Profit' if total_income > total_expenditures else 'Loss' if total_income < total_expenditures else 'Neutral'
+        profit_loss_status = 'Neutral'
+        profit_loss_value=0
+
+        if total_income>total_expenditures:
+            profit_loss_status='Profit'
+            profit_loss_value=total_income - total_expenditures
+        elif total_income<total_expenditures:
+            profit_loss_status='Loss'
+            profit_loss_value=total_expenditures - total_income
 
         summary_data = {
             'total_income_spent': total_income_spent,
             'total_income_gained': total_income_gained,
-            'profit_loss_status': profit_loss_status
+            'profit_loss_status': profit_loss_status,
+            'profit_loss_value':profit_loss_value,
         }
-    daily_expenditures=DailyExpenditure.objects.filter(branch=branch)    
+       
 
     return render(request, 'branch_reports.html', {
         'branch': branch,
@@ -169,6 +196,8 @@ def branch_reports(request, branch_id):
         'summary_data': summary_data,
         'summary_period': summary_period,
         'daily_expenditures':daily_expenditures,
+        'date_search_form':date_search_form,
+        'selected_date':selected_date,
     })
 
 @login_required
